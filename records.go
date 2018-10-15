@@ -1,75 +1,75 @@
 package auroradnsclient
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-
-	"github.com/edeckers/auroradnsclient/records"
-	"github.com/sirupsen/logrus"
+	"net/http"
 )
 
+// Record a DNS record
+type Record struct {
+	ID         string `json:"id,omitempty"`
+	RecordType string `json:"type"`
+	Name       string `json:"name"`
+	Content    string `json:"content"`
+	TTL        int    `json:"ttl,omitempty"`
+}
+
 // GetRecords returns a list of all records in given zone
-func (client *AuroraDNSClient) GetRecords(zoneID string) ([]records.GetRecordsResponse, error) {
-	logrus.Debugf("GetRecords(%s)", zoneID)
-	relativeURL := fmt.Sprintf("zones/%s/records", zoneID)
+func (c *Client) GetRecords(zoneID string) ([]Record, *http.Response, error) {
+	relativeURL := fmt.Sprintf("/zones/%s/records", zoneID)
 
-	response, err := client.requestor.Request(relativeURL, "GET", []byte(""))
+	req, err := c.newRequest(http.MethodGet, relativeURL, nil)
 	if err != nil {
-		logrus.Errorf("Failed to receive records: %s", err)
-		return nil, err
+		return nil, nil, err
 	}
 
-	var respData []records.GetRecordsResponse
-	err = json.Unmarshal(response, &respData)
+	var respData []Record
+	resp, err := c.do(req, &respData)
 	if err != nil {
-		logrus.Errorf("Failed to unmarshall response: %s", err)
-		return nil, err
+		return nil, resp, err
 	}
 
-	return respData, nil
+	return respData, resp, nil
 }
 
 // CreateRecord creates a new record in given zone
-func (client *AuroraDNSClient) CreateRecord(zoneID string, data records.CreateRecordRequest) (*records.CreateRecordResponse, error) {
-	logrus.Debugf("CreateRecord(%s, %+v)", zoneID, data)
-	body, err := json.Marshal(data)
+func (c *Client) CreateRecord(zoneID string, record Record) (*Record, *http.Response, error) {
+	body, err := json.Marshal(record)
 	if err != nil {
-		logrus.Errorf("Failed to marshall request body: %s", err)
-
-		return nil, err
+		return nil, nil, fmt.Errorf("failed to marshall request body: %v", err)
 	}
 
-	relativeURL := fmt.Sprintf("zones/%s/records", zoneID)
+	relativeURL := fmt.Sprintf("/zones/%s/records", zoneID)
 
-	response, err := client.requestor.Request(relativeURL, "POST", body)
+	req, err := c.newRequest(http.MethodPost, relativeURL, bytes.NewReader(body))
 	if err != nil {
-		logrus.Errorf("Failed to create record: %s", err)
-
-		return nil, err
+		return nil, nil, err
 	}
 
-	var respData *records.CreateRecordResponse
-	err = json.Unmarshal(response, &respData)
+	respData := new(Record)
+	resp, err := c.do(req, respData)
 	if err != nil {
-		logrus.Errorf("Failed to unmarshall response: %s", err)
-
-		return nil, err
+		return nil, resp, err
 	}
 
-	return respData, nil
+	return respData, resp, nil
 }
 
 // RemoveRecord removes a record corresponding to a particular id in a given zone
-func (client *AuroraDNSClient) RemoveRecord(zoneID string, recordID string) (*records.RemoveRecordResponse, error) {
-	logrus.Debugf("RemoveRecord(%s, %s)", zoneID, recordID)
-	relativeURL := fmt.Sprintf("zones/%s/records/%s", zoneID, recordID)
+func (c *Client) RemoveRecord(zoneID string, recordID string) (bool, *http.Response, error) {
+	relativeURL := fmt.Sprintf("/zones/%s/records/%s", zoneID, recordID)
 
-	_, err := client.requestor.Request(relativeURL, "DELETE", nil)
+	req, err := c.newRequest(http.MethodDelete, relativeURL, nil)
 	if err != nil {
-		logrus.Errorf("Failed to remove record: %s", err)
-
-		return nil, err
+		return false, nil, err
 	}
 
-	return &records.RemoveRecordResponse{}, nil
+	resp, err := c.do(req, nil)
+	if err != nil {
+		return false, resp, err
+	}
+
+	return true, resp, nil
 }

@@ -1,5 +1,1 @@
-start
-tests
-client_test.go
-build/
 vendor/

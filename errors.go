@@ -1,11 +1,13 @@
 package auroradnsclient
 
-// AuroraDNSError describes the format of a generic AuroraDNS API error
-type AuroraDNSError struct {
+import "fmt"
+
+// ErrorResponse describes the format of a generic AuroraDNS API error
+type ErrorResponse struct {
 	ErrorCode string `json:"error"`
 	Message   string `json:"errormsg"`
 }
 
-func (e AuroraDNSError) Error() string {
-	return e.Message
+func (e *ErrorResponse) Error() string {
+	return fmt.Sprintf("%s - %s", e.ErrorCode, e.Message)
 }

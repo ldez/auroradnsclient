@@ -1,29 +1,27 @@
 package auroradnsclient
 
 import (
-	"encoding/json"
-
-	"github.com/edeckers/auroradnsclient/zones"
-	"github.com/sirupsen/logrus"
+	"net/http"
 )
 
+// Zone a DNS zone
+type Zone struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // GetZones returns a list of all zones
-func (client *AuroraDNSClient) GetZones() ([]zones.ZoneRecord, error) {
-	logrus.Debugf("GetZones")
-	response, err := client.requestor.Request("zones", "GET", []byte(""))
-
+func (c *Client) GetZones() ([]Zone, *http.Response, error) {
+	req, err := c.newRequest(http.MethodGet, "/zones", nil)
 	if err != nil {
-		logrus.Errorf("Failed to get zones: %s", err)
-		return nil, err
+		return nil, nil, err
 	}
 
-	var respData []zones.ZoneRecord
-	err = json.Unmarshal(response, &respData)
+	var zones []Zone
+	resp, err := c.do(req, &zones)
 	if err != nil {
-		logrus.Errorf("Failed to unmarshall response: %s", err)
-		return nil, err
+		return nil, resp, err
 	}
 
-	logrus.Debugf("Unmarshalled response: %+v", respData)
-	return respData, nil
+	return zones, resp, nil
 }

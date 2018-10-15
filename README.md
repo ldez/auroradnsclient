@@ -13,27 +13,23 @@ An wrapper library for the Aurora DNS API, written in Go.
 
 ## Requirements
 
-* Go >= 1.6
+* Go >= 1.6 (Go >= 1.11 for dev)
 
-## Build
-
-```bash
-make deps
-make build
-```
-
-## Test
+## Validate
 
 ```bash
-make test
+make
 ```
 
 ## Basic usage
 
 ```go
-client, _ := NewAuroraDNSClient(fakeAuroraEndpoint, fakeAuroraDNSUserId, fakeAuroraDNSKey)
+tr, _ := aurora.NewTokenTransport("userID", "key")
+client, _ := aurora.NewClient(tr.Client())
 
-zones, err := client.GetZones()
+zones, _, _ := client.GetZones()
+
+fmt.Println(zones)
 ```
 
 ## License
