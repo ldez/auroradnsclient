@@ -1,4 +1,4 @@
-module github.com/edeckers/auroradnsclient
+module github.com/ldez/go-auroradns
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
