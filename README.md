@@ -1,5 +1,11 @@
 # Go library for accessing the Aurora DNS API
 
+---
+
+**ARCHIVED**: the client migrated to https://github.com/nrdcg/auroradns.
+---
+
+
 [![GoDoc](https://godoc.org/github.com/ldez/go-auroradns?status.svg)](https://godoc.org/github.com/ldez/go-auroradns)
 [![Build Status](https://travis-ci.org/ldez/go-auroradns.svg?branch=master)](https://travis-ci.org/ldez/go-auroradns)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ldez/go-auroradns)](https://goreportcard.com/report/github.com/ldez/go-auroradns)
